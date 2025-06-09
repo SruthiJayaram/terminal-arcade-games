@@ -32,7 +32,7 @@ def ttt(name = 'PlayerOne'):
             print(f" {board[6]} | {board[7]} | {board[8]} ")
             print("\n")
             
-        def check_winner():
+        def check_winner_for(player):
             win_combos = [
                 [0, 1, 2], [3, 4, 5], [6, 7, 8],
                 [0, 3, 6], [1, 4, 7], [2, 5, 8],
@@ -44,6 +44,46 @@ def ttt(name = 'PlayerOne'):
             
         def is_full():
             return all(cell != ' ' for cell in board)
+        
+        def min_max(is_maximizing):
+            if check_winner_for(computer_symbol):
+                return 1
+            elif check_winner_for(playersymbol):
+                return -1
+            elif is_full():
+                return 0
+            
+            if is_maximizing:
+                best_score = -float('inf')
+                for i in range(9):
+                    if board[i] == ' ':
+                        board[i] = computer_symbol
+                        score = min_max(False)
+                        board[i] = ' '
+                        best_score = max(score, best_score)
+                return best_score
+            else:
+                best_score = float('inf')
+                for i in range(9):
+                    if board[i] == ' ':
+                        board[i] = playersymbol
+                        score = min_max(True)
+                        board[i] = ' '
+                        best_score = min(score, best_score)
+                return best_score
+        
+        def computer_move():
+            best_score = -float('inf')
+            move = None
+            for i in range(9):
+                if board[i] == ' ':
+                    board[i] = computer_symbol
+                    score = min_max(False)
+                    board[i] = ' '
+                    if score > best_score:
+                        best_score = score
+                        move = i
+            return move
         while True:
             print_board()
             if current_player == playersymbol:
@@ -56,12 +96,11 @@ def ttt(name = 'PlayerOne'):
                     print("\nInvalid input. Please enter a number between 0 and 8.")
                     continue
             else:
-                available_moves = [i for i, cell in enumerate(board) if cell == ' ']
-                move = random.choice(available_moves)
+                move = computer_move()
                 print(f"Computer chose position {move}.")
             board[move] = current_player
             
-            if check_winner():
+            if check_winner_for(current_player):
                 print_board()
                 if current_player == playersymbol:
                     print(f"\n🎉🎉{name} wins!")
