@@ -4,12 +4,25 @@ import random
 def ttt(name = 'PlayerOne'):
     game_count = 0
     player_wins = 0
+    computer_wins = 0
     def play_ttt():
         nonlocal game_count
         nonlocal player_wins
+        nonlocal computer_wins
         nonlocal name
-        board = [' ' for _ in range(9)]
+        
+        while True:
+            playersymbol = input(f"\n{name}, do you want to be 'X' or 'O'?\n").upper()
+            if playersymbol in ['X', 'O']:
+                break
+            else:
+                print("\nInvalid input. Please enter 'X' or 'O'.")
+        if playersymbol == 'X':
+            computer_symbol = 'O'
+        else:
+            computer_symbol = 'X'
         current_player = 'X'
+        board = [' ' for _ in range(9)]
         def print_board():
             print("\n")
             print(f" {board[0]} | {board[1]} | {board[2]} ")
@@ -33,33 +46,44 @@ def ttt(name = 'PlayerOne'):
             return all(cell != ' ' for cell in board)
         while True:
             print_board()
-            try:
-                move = int(input(f"{name} ({current_player}), enter your move (0-8): "))
-                if move < 0 or move >= 9 or board[move] != ' ':
-                    print("\nInvalid move. Try again.")
+            if current_player == playersymbol:
+                try:
+                    move = int(input(f"{name}, enter your move (0-8): "))
+                    if move < 0 or move >= 9 or board[move] != ' ':
+                        print("\nInvalid move. Try again.")
+                        continue
+                except ValueError:
+                    print("\nInvalid input. Please enter a number between 0 and 8.")
                     continue
-            except ValueError:
-                print("\nInvalid input. Please enter a number between 1 and 9.")
-                continue
-            
+            else:
+                available_moves = [i for i, cell in enumerate(board) if cell == ' ']
+                move = random.choice(available_moves)
+                print(f"Computer chose position {move}.")
             board[move] = current_player
             
             if check_winner():
                 print_board()
-                print(f"\n🎉🎉{name} wins as ({current_player})!")
-                player_wins += 1
+                if current_player == playersymbol:
+                    print(f"\n🎉🎉{name} wins!")
+                    player_wins += 1
+                else:
+                    print(f"\n🤖Computer wins! Better luck next time, {name}.")
+                    computer_wins += 1
                 break
-            
             if is_full():
                 print_board()
                 print("\nIt's a tie 🫨!")
                 break
             
-            current_player = "O" if current_player == "X" else "X"
-            game_count += 1
-            print(f"\n Count: {game_count}")
-            print(f"\n{name} Wins: {player_wins}")
-            print(f"\n\nPlay again, {name}?") 
+            if current_player == playersymbol:
+                current_player = computer_symbol
+            else:
+                current_player = playersymbol
+        game_count += 1
+        print(f"Game Count: {game_count}")
+        print(f"{name} Wins: {player_wins}")
+        print(f"Computer Wins: {computer_wins}")
+        print(f"\n\nPlay again, {name}?") 
         while True:
             play_again = input("\nY for Yes,\nQ for Quit\n ")
             if play_again.lower() not in ["y", "q"]:
